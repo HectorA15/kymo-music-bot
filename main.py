@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 import yt_dlp
 import asyncio
+from keep_alive import keep_alive
+
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 if not token:
@@ -262,5 +264,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 if not TOKEN:
     print("ERROR: No se encontró DISCORD_TOKEN")
     exit(1)
+
+keep_alive()
 
 bot.run(TOKEN)
