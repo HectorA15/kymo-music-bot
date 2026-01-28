@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for kymo-music-bot-qkqsca on 2026-01-28T21:33:11Z
+# fly.toml app configuration file generated for kymo-music-bot-mrlyig on 2026-01-28T21:38:49Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'kymo-music-bot-qkqsca'
-primary_region = 'ams'
+app = 'kymo-music-bot-mrlyig'
+primary_region = 'dfw'
 
 [build]
 
