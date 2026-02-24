@@ -1,0 +1,9 @@
+scopes
+
+bot
+applications.commands
+
+identify
+guilds
+guild.join
+connection

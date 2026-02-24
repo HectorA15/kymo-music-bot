@@ -10,6 +10,7 @@ from keep_alive import keep_alive
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
+owner_id = int(os.getenv("OWNER_ID", 0))
 if not token:
     raise RuntimeError("DISCORD_TOKEN is missing. Check your .env file.")
 
@@ -159,16 +160,16 @@ async def _player_loop(guild: discord.Guild) -> None:
         embed = discord.Embed(title="Now Playing", description=f"[{title}]({info.get('webpage_url')})", color=discord.Color.blue())
         if info.get("thumbnail"):
             embed.set_thumbnail(url=info["thumbnail"])
-        
+
         duration = info.get("duration")
         if duration:
             minutes, seconds = divmod(duration, 60)
             embed.add_field(name="Duration", value=f"{minutes:02d}:{seconds:02d}", inline=True)
-        
+
         embed.add_field(name="Requested by", value=_get_author(ctx).mention, inline=True)
 
         await _send(ctx, embed=embed)
-        
+
         while voice_client.is_playing() or voice_client.is_paused():
             await asyncio.sleep(0.5)
 
@@ -208,7 +209,7 @@ async def _play_core(ctx, url: str) -> None:
     queue = _get_queue(voice_client.guild.id)
     was_idle = (not voice_client.is_playing()) and queue.empty()
     await queue.put((info, ctx))
-    
+
     if status_msg:
         try:
             await status_msg.delete()
@@ -227,6 +228,33 @@ async def _play_core(ctx, url: str) -> None:
 @bot.command(name='play', help='plays url music')
 async def play(ctx, url: str):
     await _play_core(ctx, url)
+
+
+@bot.command(name='message', help='hola')
+async def message(ctx, message: str):
+    if ctx.author.id != owner_id:
+        ctx.send("A quien verga le estas diciendo que hacer")
+        return
+    await ctx.send(message)
+
+
+@app_commands.command(name='message', description="Send a message to the channel (no command reply)")
+@app_commands.describe(message="Message to send")
+async def message_slash(interaction: discord.Interaction, message: str) -> None:
+    if interaction.user.id != owner_id:
+        await interaction.response.send_message("No eres mi jefe puñetas", ephemeral=True)
+        return
+
+    # Ack privately so nothing appears in the channel as a "slash command response"
+    await interaction.response.defer(ephemeral=True)
+
+    if interaction.channel is None:
+        await interaction.followup.send("No channel available here.", ephemeral=True)
+        return
+
+    # Normal message to the channel (everyone sees it)
+    await interaction.channel.send(message)
+
 
 
 @app_commands.command(name="play", description="Play audio from a URL")
@@ -317,6 +345,8 @@ bot.tree.add_command(pause_slash)
 bot.tree.add_command(resume_slash)
 bot.tree.add_command(stop_slash)
 bot.tree.add_command(skip_slash)
+bot.tree.add_command(message_slash)
+
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
